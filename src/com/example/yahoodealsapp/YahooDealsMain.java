@@ -1,6 +1,6 @@
 package com.example.yahoodealsapp;
 
-import java.io.ByteArrayOutputStream;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -22,18 +22,14 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.StrictMode;
-import android.view.GestureDetector;
+
 import android.view.Menu;
 import android.view.MenuInflater;
-import android.view.MotionEvent;
+
 import android.view.View;
-import android.view.GestureDetector.SimpleOnGestureListener;
-import android.view.ViewGroup;
+
 import android.view.Window;
-import android.view.animation.Animation;
-import android.view.animation.Animation.AnimationListener;
-import android.view.animation.AnimationUtils;
-import android.view.animation.ScaleAnimation;
+
 import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.SearchView;
@@ -42,12 +38,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 
 @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-public class YahooDealsMain extends Activity implements OnItemClickListener {
-	
-	private static final int SWIPE_MIN_DISTANCE = 120;
-    private static final int SWIPE_MAX_OFF_PATH = 250;
-    private static final int SWIPE_THRESHOLD_VELOCITY = 200;
-	private GestureDetector gestureDetector;
+public class YahooDealsMain extends Activity {
 	// All static variables
 	static final String URL = "http://api.androidhive.info/music/music.xml";
 	// XML node keys
@@ -96,6 +87,7 @@ public class YahooDealsMain extends Activity implements OnItemClickListener {
 		actionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#33F0F0F0")));
 		//actionBar.setStackedBackgroundDrawable(new ColorDrawable(Color.parseColor("#550000ff")));
 		setContentView(R.layout.activity_yahoo_deals_main);
+		
 		/* The following is for the network connectivity Error
 		 */ 
 		if (android.os.Build.VERSION.SDK_INT > 9) {
@@ -115,7 +107,7 @@ public class YahooDealsMain extends Activity implements OnItemClickListener {
 		Document doc = parser.getDomElement(xml); // getting DOM element
 		
 		NodeList nl = doc.getElementsByTagName(KEY_SONG);
-		// looping through all song nodes <song>
+		// looping through all the nodes from XML to create an HashMap
 		for (int i = 0; i < nl.getLength(); i++) {
 			// creating new HashMap
 			HashMap<String, String> map = new HashMap<String, String>();
@@ -146,51 +138,15 @@ public class YahooDealsMain extends Activity implements OnItemClickListener {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
+				//FETCHES THE DATA...
 				// getting values from selected ListItem
 				String name = ((TextView) view.findViewById(R.id.artist)).getText().toString();
 				String cost = ((TextView) view.findViewById(R.id.title)).getText().toString();
 				String description = ((TextView) view.findViewById(R.id.duration)).getText().toString();
-				String url = ((TextView) view.findViewById(R.id.url)).getText().toString();
+				String url = ((TextView) view.findViewById(R.id.url)).getText().toString();	
+				ImageView img=(ImageView)view.findViewById(R.id.list_image);			
 				
-				ImageView img=(ImageView)view.findViewById(R.id.list_image);
-				
-				
-				
-				
-				/*//ANIMATION FOR SLIDE OUT AND SLIDE IN
-				stationsContainer = findViewById(R.id.yahooMain);
-				//for(int i=0;i<list.getChildCount();i++){
-					
-					final ViewGroup row = (ViewGroup)list.getChildAt(position); 
-				    stationsContainer_rows = row.findViewById(R.id.row_deals);
-				    Animation an = AnimationUtils.loadAnimation(row.getContext(), R.anim.slide_out_right);
-				    an.setDuration(500);
-				    //stationsContainer_rows.animate().rotationYBy(720);
-				    
-				    stationsContainer_rows.startAnimation(an);
-				    an.setAnimationListener(new AnimationListener() {
-
-				        public void onAnimationStart(Animation animation) {
-				            // TODO Auto-generated method stub
-
-				        }
-
-				        public void onAnimationRepeat(Animation animation) {
-				            // TODO Auto-generated method stub
-
-				        }
-
-				        public void onAnimationEnd(Animation animation) {
-				        	//stationsContainer.setVisibility(View.GONE);
-				        }
-				    });
-				//}
-*/				
-				    
-				  //ANIMATION ENDS  
-				    
-				
-				
+				//CREATES AND INTENT TO SEND TO THE SELECTED DEALS ACTIVITY..
 				// Starting new intent
 				Intent in = new Intent(getApplicationContext(), SelectedDeal.class);
 				in.putExtra(KEY_ARTIST, name);
@@ -204,75 +160,8 @@ public class YahooDealsMain extends Activity implements OnItemClickListener {
 				in.putExtra("selectedImage", b);
 				startActivity(in);
 				
-				/*//ANIMATION FOR SELECTED DEAL TO SLIDE IN..
-				YahooDealsMain.this.overridePendingTransition(
-						R.anim.slide_in_right,
-						R.anim.slide_out_left
-    				);*/
-				
 			}		
 
 		});		
-	
-       
-        
-	/*gestureDetector = new GestureDetector(new MyGestureDetector());
-    View mainview = (View) findViewById(R.id.list);
-    
-    // Set the touch listener for the main view to be our custom gesture listener
-    mainview.setOnTouchListener(new View.OnTouchListener() {
-        public boolean onTouch(View v, MotionEvent event) {
-            if (gestureDetector.onTouchEvent(event)) {
-                return true;
-            }
-            return false;
-        }
-    });*/
 }
-	
-	
-	
-	 class MyGestureDetector extends SimpleOnGestureListener {
-	        @Override
-	        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-		        	Intent intent = new Intent(YahooDealsMain.this.getBaseContext(), SelectedDeal.class);
-	        	
-	            if (Math.abs(e1.getY() - e2.getY()) > SWIPE_MAX_OFF_PATH) {
-	                return false;
-	            }
-	            
-	            // right to left swipe
-	            if(e1.getX() - e2.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {	
-	            	startActivity(intent);
-	    				
-	    				YahooDealsMain.this.overridePendingTransition(
-							R.anim.slide_in_right,
-							R.anim.slide_out_left
-	    				);
-	    			// right to left swipe
-	            }  else if (e2.getX() - e1.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
-	    				startActivity(intent);
-	    				YahooDealsMain.this.overridePendingTransition(
-							R.anim.slide_in_left, 
-							R.anim.slide_out_right
-	    				);
-	            }
-
-	            return false;
-	        }
-	        
-	        // It is necessary to return true from onDown for the onFling event to register
-	        @Override
-	        public boolean onDown(MotionEvent e) {
-		        	return true;
-	        }
-	    }
-
-
-
-	@Override
-	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-		// TODO Auto-generated method stub
-		
-	}
 }

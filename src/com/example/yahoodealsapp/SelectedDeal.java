@@ -98,6 +98,6 @@ public class SelectedDeal extends Activity {
 	public void onBackPressed() {
 	  SelectedDeal.this.finish();
 	  overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
-	  YahooDealsMain.stationsContainer.setVisibility(View.VISIBLE);
+	  //YahooDealsMain.stationsContainer.setVisibility(View.VISIBLE);
 	}
 }

@@ -46,6 +46,7 @@ public class YahooDealsAdapter extends BaseAdapter {
         if(convertView==null)
             vi = inflater.inflate(R.layout.list_row, null);
 
+        //Gets the View from the layout...
         TextView title = (TextView)vi.findViewById(R.id.title); // title
         TextView artist = (TextView)vi.findViewById(R.id.artist); // artist name
         TextView duration = (TextView)vi.findViewById(R.id.duration); // duration
@@ -54,6 +55,7 @@ public class YahooDealsAdapter extends BaseAdapter {
         HashMap<String, String> song = new HashMap<String, String>();
         song = data.get(position);
         
+        //Decorates the views from the values put in the intent..
         // Setting all values in listview
         title.setText(song.get(YahooDealsMain.KEY_TITLE));
         artist.setText(song.get(YahooDealsMain.KEY_ARTIST));
