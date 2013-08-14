@@ -31,6 +31,7 @@ import android.view.View;
 import android.view.Window;
 
 import android.widget.AdapterView;
+import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.SearchView;
 import android.widget.TextView;
@@ -48,7 +49,7 @@ public class YahooDealsMain extends Activity {
 	static final String KEY_ARTIST = "artist";
 	static final String KEY_DURATION = "duration";
 	static final String KEY_THUMB_URL = "thumb_url";
-	
+	ArrayList<HashMap<String, String>> songsList = new ArrayList<HashMap<String, String>>();
 	ListView list;
     YahooDealsAdapter adapter;
     static View stationsContainer;
@@ -100,7 +101,7 @@ public class YahooDealsMain extends Activity {
 		
 		  
 		
-		ArrayList<HashMap<String, String>> songsList = new ArrayList<HashMap<String, String>>();
+		
 
 		XMLParser parser = new XMLParser();
 		String xml = parser.getXmlFromUrl(URL); // getting XML from URL
@@ -158,6 +159,38 @@ public class YahooDealsMain extends Activity {
 				/*ByteArrayOutputStream bs = new ByteArrayOutputStream();
 				b.compress(Bitmap.CompressFormat.PNG, 50, bs);*/
 				in.putExtra("selectedImage", b);
+				
+				//UPDATE THE DATA ON CLICK TRIAL ! ! COMMENTED ... NOW ! !
+				
+				/*
+				songsList.clear();
+				XMLParser parser = new XMLParser();
+				String xml = parser.getXmlFromUrl(URL); // getting XML from URL
+				Document doc = parser.getDomElement(xml); // getting DOM element
+				
+				NodeList nl = doc.getElementsByTagName(KEY_SONG);
+				// looping through all the nodes from XML to create an HashMap
+				for (int i = 0; i < nl.getLength(); i++) {
+					// creating new HashMap
+					HashMap<String, String> map = new HashMap<String, String>();
+					Element e = (Element) nl.item(i);
+					// adding each child node to HashMap key => value
+					map.put(KEY_ID, parser.getValue(e, KEY_ID));
+					map.put(KEY_TITLE, parser.getValue(e, KEY_TITLE));
+					map.put(KEY_ARTIST, parser.getValue(e, KEY_ARTIST));
+					map.put(KEY_DURATION, parser.getValue(e, KEY_DURATION));
+					map.put(KEY_THUMB_URL, "http://api.androidhive.info/music/images/adele.png");
+
+					// adding HashList to ArrayList
+					songsList.add(map);
+				}
+				
+	
+				list=(ListView)findViewById(R.id.list);
+				adapter.notifyDataSetInvalidated();
+				//adapter.notifyDataSetChanged();
+				((BaseAdapter)list.getAdapter()).notifyDataSetChanged(); 
+		       	*/
 				startActivity(in);
 				
 			}		
