@@ -24,6 +24,9 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.location.Address;
 import android.location.Geocoder;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.StrictMode;
@@ -112,10 +115,34 @@ public class YahooDealsMain extends Activity {
 		
 		
 		TextView myAddress = (TextView) findViewById(R.id.myAddress);
+		LocationManager currentLocationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
 		
-			
-		
-		Geocoder geocoder = new Geocoder(getBaseContext(), Locale.ENGLISH);
+		final LocationListener locationListener = new LocationListener() {
+	        public void onLocationChanged(Location location) {
+	        	LONGITUDE = location.getLongitude();
+	            LATITUDE  = location.getLatitude();
+	        }
+
+	        public void onProviderDisabled(String arg0) {
+	            // TODO Auto-generated method stub
+
+	        }
+
+	        public void onProviderEnabled(String arg0) {
+	            // TODO Auto-generated method stub
+
+	        }
+
+	        public void onStatusChanged(String arg0, int arg1, Bundle arg2) {
+	            // TODO Auto-generated method stub
+
+	        }
+	    };
+
+	    currentLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000, 10, locationListener);
+	    myAddress = (TextView) findViewById(R.id.myAddress);
+	    
+	    Geocoder geocoder = new Geocoder(getBaseContext(), Locale.ENGLISH);
         try {
             List<Address> addresses = geocoder.getFromLocation(LATITUDE,
 					LONGITUDE, 1);
