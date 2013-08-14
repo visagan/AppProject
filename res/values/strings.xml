@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="hello">Hello World, CustomizedListView!</string>
+    <string name="app_name">Y! Deals.</string>
+    <string name="title_activity_selected_deal">SelectedDeal</string>
+    <string name="action_settings">Settings</string>
+    <string name="hello_world">Hello world!</string>
+	<string name="action_search">Search Deals</string>
+</resources>
