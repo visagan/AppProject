@@ -1,8 +1,11 @@
 package com.example.yahoodealsapp;
 
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -19,6 +22,8 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.location.Address;
+import android.location.Geocoder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.StrictMode;
@@ -78,6 +83,10 @@ public class YahooDealsMain extends Activity {
 	    return super.onCreateOptionsMenu(menu);
     }
     
+    double LATITUDE = 41.869179;
+    double LONGITUDE = -87.663452;
+    
+    
 	@TargetApi(Build.VERSION_CODES.GINGERBREAD)
 	@SuppressLint("NewApi")
 	@Override
@@ -85,7 +94,7 @@ public class YahooDealsMain extends Activity {
 		super.onCreate(savedInstanceState);
 		getWindow().requestFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
 		ActionBar actionBar = getActionBar();
-		actionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#33F0F0F0")));
+		actionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#10F0F0F0")));
 		//actionBar.setStackedBackgroundDrawable(new ColorDrawable(Color.parseColor("#550000ff")));
 		setContentView(R.layout.activity_yahoo_deals_main);
 		
@@ -99,7 +108,37 @@ public class YahooDealsMain extends Activity {
 		/* ********************************************************/
 
 		
-		  
+		  /******** GETTING THE GEO LOCATION AND PERFORM ADDRESS SEARCH ****/
+		
+		
+		TextView myAddress = (TextView) findViewById(R.id.myAddress);
+		
+			
+		
+		Geocoder geocoder = new Geocoder(getBaseContext(), Locale.ENGLISH);
+        try {
+            List<Address> addresses = geocoder.getFromLocation(LATITUDE,
+					LONGITUDE, 1);
+
+            if (addresses.size() > 0) {
+                Address returnedAddress = addresses.get(0);
+                StringBuilder strReturnedAddress = new StringBuilder(
+                        "Address:\n");
+                for (int i = 0; i < returnedAddress
+                        .getMaxAddressLineIndex(); i++) {
+                    strReturnedAddress.append(
+                            returnedAddress.getAddressLine(i)).append("\n");
+                }
+                myAddress.setText(strReturnedAddress.toString());
+            } else {
+                myAddress.setText("No Address returned!");
+            }
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+
+        }
+		/*******************GEO LOCATION SEARCH ENDS**************/
 		
 		
 
