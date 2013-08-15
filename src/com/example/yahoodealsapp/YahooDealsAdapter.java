@@ -57,11 +57,11 @@ public class YahooDealsAdapter extends BaseAdapter {
         
         //Decorates the views from the values put in the intent..
         // Setting all values in listview
-        title.setText(song.get(YahooDealsMain.KEY_TITLE));
-        artist.setText(song.get(YahooDealsMain.KEY_ARTIST));
-        duration.setText(song.get(YahooDealsMain.KEY_DURATION));
-        imageLoader.DisplayImage(song.get(YahooDealsMain.KEY_THUMB_URL), thumb_image);
-        url.setText(song.get(YahooDealsMain.KEY_THUMB_URL));
+        title.setText(song.get(Constants.KEY_DEAL));
+        artist.setText(song.get(Constants.KEY_DEALER));
+        duration.setText(song.get(Constants.KEY_DURATION));
+        imageLoader.DisplayImage(song.get(Constants.KEY_THUMB_URL), thumb_image);
+        url.setText(song.get(Constants.KEY_THUMB_URL));
         url.setVisibility(View.INVISIBLE);
         return vi;
     }

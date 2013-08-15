@@ -1,63 +1,132 @@
 package com.example.yahoodealsapp;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
 
-
-
-import android.net.Uri;
-import android.os.Bundle;
-import android.app.Activity;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.widget.ImageView;
-import android.widget.TextView;
-import android.support.v4.app.NavUtils;
 import android.annotation.TargetApi;
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Build;
+import android.os.Bundle;
+import android.provider.Settings;
+import android.support.v4.app.NavUtils;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import com.example.yahoodealsapp.Constants;
 
 public class SelectedDeal extends Activity {
-	// XML node keys
-		static final String KEY_SONG = "song"; // parent node
-		static final String KEY_ID = "id";
-		static final String KEY_TITLE = "title";
-		static final String KEY_ARTIST = "artist";
-		static final String KEY_DURATION = "duration";
-		static final String KEY_THUMB_URL = "thumb_url";
-		
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-        setContentView(R.layout.selected_deal);
-        
-        // getting intent data
-        Intent in = getIntent();
-        
-        // Get XML values from previous intent
-        String name = in.getStringExtra(KEY_TITLE);
-        String cost = in.getStringExtra(KEY_ARTIST);
-        String description = in.getStringExtra(KEY_DURATION);
-        String url = in.getStringExtra(KEY_THUMB_URL);
-        // Displaying all values on the screen
-        TextView lblName = (TextView) findViewById(R.id.artist);
-        TextView lblCost = (TextView) findViewById(R.id.title);
-        TextView lblDesc = (TextView) findViewById(R.id.duration);
-       
-        
-        //Bitmap bitmap = (Bitmap)this.getIntent().getParcelableExtra("selectedImage");  
-        ImageView image = (ImageView)findViewById(R.id.list_image_selected);
-        //image.setImageBitmap(bitmap);
-        lblName.setText(name);
-        lblCost.setText(cost);
-        lblDesc.setText(description);
-        
-        Bitmap bitmap=ImageLoader.memoryCache.get(url);
-        if(bitmap!=null)
-            image.setImageBitmap(bitmap);
-        
+		setContentView(R.layout.selected_deal);
+
+		// getting intent data
+		Intent in = getIntent();
+
+		// Get XML values from previous intent
+		String name = in.getStringExtra(Constants.KEY_DEAL);
+		String cost = in.getStringExtra(Constants.KEY_DEALER);
+		String description = in.getStringExtra(Constants.KEY_DURATION);
+		String url = in.getStringExtra(Constants.KEY_THUMB_URL);
+		String latitude = in.getStringExtra(Constants.KEY_LATITUDE);
+		String longitude = in.getStringExtra(Constants.KEY_LONGITUDE);
+		
+		// Displaying all values on the screen
+		TextView lblDealer = (TextView) findViewById(R.id.dealer);
+		TextView lblDeal = (TextView) findViewById(R.id.deal);
+		TextView lblPrice = (TextView) findViewById(R.id.price);
+
+		// Bitmap bitmap =
+		// (Bitmap)this.getIntent().getParcelableExtra("selectedImage");
+		ImageView image = (ImageView) findViewById(R.id.list_image_selected);
+		// image.setImageBitmap(bitmap);
+		lblDealer.setText(name);
+		lblDeal.setText(cost);
+		lblPrice.setText(description);
+
+		Bitmap bitmap = ImageLoader.memoryCache.get(url);
+		if (bitmap != null)
+			image.setImageBitmap(bitmap);
+		
+		notifyServer(name, cost, latitude, longitude);
+
+	}
+
+	public enum Event {
+	    CLICK, CONVERSION, ACQUISTION 
+	}
+
+	private void notifyServer(String name, String cost, String latitude, String longitude) {
+		// TODO Auto-generated method stub
+		 	Event event = determineEvent(latitude, longitude);		 	
+		  	HttpClient httpclient = new DefaultHttpClient();
+		  	HttpPost httppost = null;
+		  	switch(event) {
+		  		case CLICK:
+		  			httppost = new HttpPost("http://www.yoursite.com/script.php");
+		  			break;
+		  		case CONVERSION:
+		  			httppost = new HttpPost("http://www.yoursite.com/script.php");
+		  			break;
+		  		case ACQUISTION:
+		  			httppost = new HttpPost("http://www.yoursite.com/script.php");
+		  			break;
+		  	}
+
+		    try {
+		        // Add your data
+		        List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
+		        nameValuePairs.add(new BasicNameValuePair("id", "12345"));
+		        nameValuePairs.add(new BasicNameValuePair("stringdata", "Hi"));
+		        httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+
+		        // Execute HTTP Post Request
+		        HttpResponse response = httpclient.execute(httppost);
+
+		    } catch (ClientProtocolException e) {
+		        // TODO Auto-generated catch block
+		    } catch (IOException e) {
+		        // TODO Auto-generated catch block
+		    }
+		
+	}
+
+	@SuppressWarnings("null")
+	private Event determineEvent(String latitude, String longitude) {
+		LocationManager currentLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+		boolean enabled = currentLocationManager
+				.isProviderEnabled(LocationManager.GPS_PROVIDER);
+		// Check if enabled and if not send user to the GSP settings
+		// Better solution would be to display a dialog and suggesting to
+		// go to the settings
+		if (!enabled) {
+			Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+			startActivity(intent);
+		}
+		
+		Location location = currentLocationManager
+				.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+		float[] results = null;
+		Location.distanceBetween(Double.valueOf(latitude), Double.valueOf(longitude), location.getLatitude(), location.getLongitude(), results);
+		return results[0] > 0 ? Event.CLICK: Event.CONVERSION;
 	}
 
 	/**
@@ -96,8 +165,8 @@ public class SelectedDeal extends Activity {
 
 	@Override
 	public void onBackPressed() {
-	  SelectedDeal.this.finish();
-	  overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
-	  //YahooDealsMain.stationsContainer.setVisibility(View.VISIBLE);
+		SelectedDeal.this.finish();
+		overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+		// YahooDealsMain.stationsContainer.setVisibility(View.VISIBLE);
 	}
 }
