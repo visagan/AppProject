@@ -9,7 +9,7 @@ public class Constants {
 	static final String KEY_DEALER = "dealer";
 	static final String KEY_DURATION = "duration";
 	static final String KEY_THUMB_URL = "thumb_url";
-	protected static final String KEY_LATITUDE = null;
-	protected static final String KEY_LONGITUDE = null;
+	protected static final String KEY_LATITUDE = "latitude";
+	protected static final String KEY_LONGITUDE = "longitude";
 
 }

@@ -53,6 +53,8 @@ public class YahooDealsAdapter extends BaseAdapter {
         ImageView thumb_image=(ImageView)vi.findViewById(R.id.list_image); // thumb image
         TextView url = (TextView)vi.findViewById(R.id.url);
         HashMap<String, String> song = new HashMap<String, String>();
+        TextView latitude = (TextView)vi.findViewById(R.id.latitude); // title
+        TextView longitude = (TextView)vi.findViewById(R.id.longitude); // longitude
         song = data.get(position);
         
         //Decorates the views from the values put in the intent..
@@ -60,6 +62,8 @@ public class YahooDealsAdapter extends BaseAdapter {
         title.setText(song.get(Constants.KEY_DEAL));
         artist.setText(song.get(Constants.KEY_DEALER));
         duration.setText(song.get(Constants.KEY_DURATION));
+        latitude.setText(song.get(Constants.KEY_LATITUDE));
+        latitude.setText(song.get(Constants.KEY_LONGITUDE));
         imageLoader.DisplayImage(song.get(Constants.KEY_THUMB_URL), thumb_image);
         url.setText(song.get(Constants.KEY_THUMB_URL));
         url.setVisibility(View.INVISIBLE);

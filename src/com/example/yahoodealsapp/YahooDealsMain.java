@@ -288,14 +288,17 @@ public class YahooDealsMain extends Activity implements
 			Element e = (Element) nl.item(i);
 			// adding each child node to HashMap key => value
 			map.put(Constants.KEY_ID, parser.getValue(e, Constants.KEY_ID));
-			map.put(Constants.KEY_DEAL,
-					parser.getValue(e, Constants.KEY_DEAL));
+			map.put(Constants.KEY_DEAL, parser.getValue(e, Constants.KEY_DEAL));
 			map.put(Constants.KEY_DEALER,
 					parser.getValue(e, Constants.KEY_DEALER));
 			map.put(Constants.KEY_DURATION,
 					parser.getValue(e, Constants.KEY_DURATION));
 			map.put(Constants.KEY_THUMB_URL,
 					parser.getValue(e, Constants.KEY_THUMB_URL));
+			map.put(Constants.KEY_LATITUDE, String.valueOf(LATITUDE));
+			// parser.getValue(e, Constants.KEY_THUMB_URL));
+			map.put(Constants.KEY_LONGITUDE, String.valueOf(LONGITUDE));
+			// parser.getValue(e, Constants.KEY_THUMB_URL));
 
 			// adding HashList to ArrayList
 			songsList.add(map);
@@ -328,8 +331,7 @@ public class YahooDealsMain extends Activity implements
 						.getText().toString();
 				String longitude = ((TextView) view.findViewById(R.id.latitude))
 						.getText().toString();
-				
-				
+
 				XMLParser parser = new XMLParser();
 				String xml = parser.getXmlFromUrl(URL); // getting XML from URL
 				Document doc = parser.getDomElement(xml); // getting DOM element

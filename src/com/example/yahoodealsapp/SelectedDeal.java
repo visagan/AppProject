@@ -24,6 +24,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v4.app.NavUtils;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
@@ -32,6 +33,8 @@ import android.widget.TextView;
 import com.example.yahoodealsapp.Constants;
 
 public class SelectedDeal extends Activity {
+
+	private static final float THRESHOLD = 1000;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -48,11 +51,12 @@ public class SelectedDeal extends Activity {
 		String url = in.getStringExtra(Constants.KEY_THUMB_URL);
 		String latitude = in.getStringExtra(Constants.KEY_LATITUDE);
 		String longitude = in.getStringExtra(Constants.KEY_LONGITUDE);
-		
+
 		// Displaying all values on the screen
 		TextView lblDealer = (TextView) findViewById(R.id.dealer);
 		TextView lblDeal = (TextView) findViewById(R.id.deal);
 		TextView lblPrice = (TextView) findViewById(R.id.price);
+		TextView lblDistance = (TextView) findViewById(R.id.distance);
 
 		// Bitmap bitmap =
 		// (Bitmap)this.getIntent().getParcelableExtra("selectedImage");
@@ -61,56 +65,61 @@ public class SelectedDeal extends Activity {
 		lblDealer.setText(name);
 		lblDeal.setText(cost);
 		lblPrice.setText(description);
+		lblDistance
+				.setText(String.valueOf(determineEvent(latitude, longitude)));
 
 		Bitmap bitmap = ImageLoader.memoryCache.get(url);
 		if (bitmap != null)
 			image.setImageBitmap(bitmap);
-		
-		notifyServer(name, cost, latitude, longitude);
+
+		Log.w("myapp", latitude + longitude);
+		// notifyServer(name, cost, latitude, longitude);
 
 	}
 
 	public enum Event {
-	    CLICK, CONVERSION, ACQUISTION 
+		CLICK, CONVERSION, ACQUISTION
 	}
 
-	private void notifyServer(String name, String cost, String latitude, String longitude) {
+	private void notifyServer(String name, String cost, String latitude,
+			String longitude) {
 		// TODO Auto-generated method stub
-		 	Event event = determineEvent(latitude, longitude);		 	
-		  	HttpClient httpclient = new DefaultHttpClient();
-		  	HttpPost httppost = null;
-		  	switch(event) {
-		  		case CLICK:
-		  			httppost = new HttpPost("http://www.yoursite.com/script.php");
-		  			break;
-		  		case CONVERSION:
-		  			httppost = new HttpPost("http://www.yoursite.com/script.php");
-		  			break;
-		  		case ACQUISTION:
-		  			httppost = new HttpPost("http://www.yoursite.com/script.php");
-		  			break;
-		  	}
+		Event event = determineEvent(latitude, longitude);
+		HttpClient httpclient = new DefaultHttpClient();
+		HttpPost httppost = null;
+		switch (event) {
+		case CLICK:
+			httppost = new HttpPost("http://www.yoursite.com/script.php");
+			break;
+		case CONVERSION:
+			httppost = new HttpPost("http://www.yoursite.com/script.php");
+			break;
+		case ACQUISTION:
+			httppost = new HttpPost("http://www.yoursite.com/script.php");
+			break;
+		}
 
-		    try {
-		        // Add your data
-		        List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
-		        nameValuePairs.add(new BasicNameValuePair("id", "12345"));
-		        nameValuePairs.add(new BasicNameValuePair("stringdata", "Hi"));
-		        httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+		try {
+			// Add your data
+			List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
+			nameValuePairs.add(new BasicNameValuePair("id", "12345"));
+			nameValuePairs.add(new BasicNameValuePair("stringdata", "Hi"));
+			httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 
-		        // Execute HTTP Post Request
-		        HttpResponse response = httpclient.execute(httppost);
+			// Execute HTTP Post Request
+			HttpResponse response = httpclient.execute(httppost);
 
-		    } catch (ClientProtocolException e) {
-		        // TODO Auto-generated catch block
-		    } catch (IOException e) {
-		        // TODO Auto-generated catch block
-		    }
-		
+		} catch (ClientProtocolException e) {
+			// TODO Auto-generated catch block
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+		}
+
 	}
 
 	@SuppressWarnings("null")
 	private Event determineEvent(String latitude, String longitude) {
+
 		LocationManager currentLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 		boolean enabled = currentLocationManager
 				.isProviderEnabled(LocationManager.GPS_PROVIDER);
@@ -121,12 +130,18 @@ public class SelectedDeal extends Activity {
 			Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
 			startActivity(intent);
 		}
-		
+
+		//
 		Location location = currentLocationManager
 				.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-		float[] results = null;
-		Location.distanceBetween(Double.valueOf(latitude), Double.valueOf(longitude), location.getLatitude(), location.getLongitude(), results);
-		return results[0] > 0 ? Event.CLICK: Event.CONVERSION;
+		float[] results = new float[1];
+		System.out.println(Double.valueOf(latitude));
+
+		Location.distanceBetween(Double.valueOf(latitude),
+				Double.valueOf(longitude), location.getLatitude(),
+				location.getLongitude(), results);
+		Log.w("myapp", String.valueOf(results[0]));
+		return results[0] > THRESHOLD ? Event.CLICK : Event.CONVERSION;
 	}
 
 	/**

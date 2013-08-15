@@ -49,6 +49,30 @@
         android:typeface="sans" />
 
 	<!-- Artist Name -->
+	  <TextView
+        android:id="@+id/latitude"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/title"
+        android:layout_marginTop="1dip"
+        android:layout_toRightOf="@+id/thumbnail"
+        android:text="Just gona stand there and ..."
+        android:textColor="#FFFFFF"
+        android:textSize="10dip" 
+        android:visibility="gone"/>
+	 
+	    <TextView
+        android:id="@+id/longitude"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/title"
+        android:layout_marginTop="1dip"
+        android:layout_toRightOf="@+id/thumbnail"
+        android:text="Just gona stand there and ..."
+        android:textColor="#FFFFFF"
+        android:textSize="10dip" 
+        android:visibility="gone"
+        />
 
     <TextView
         android:id="@+id/artist"
