@@ -17,6 +17,7 @@ import android.annotation.TargetApi;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.SearchManager;
+import android.app.SearchableInfo;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -30,9 +31,12 @@ import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.StrictMode;
+import android.provider.Settings;
+//import android.support.v4.widget.SearchViewCompatIcs.MySearchView;
 
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 
 import android.view.View;
 
@@ -47,7 +51,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 
 @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-public class YahooDealsMain extends Activity {
+public class YahooDealsMain extends Activity implements SearchView.OnQueryTextListener {
 	// All static variables
 	static final String URL = "http://api.androidhive.info/music/music.xml";
 	// XML node keys
@@ -62,6 +66,7 @@ public class YahooDealsMain extends Activity {
     YahooDealsAdapter adapter;
     static View stationsContainer;
     static View stationsContainer_rows;
+    TextView myAddress;
 
     
    /* @Override
@@ -71,6 +76,69 @@ public class YahooDealsMain extends Activity {
         return super.onCreateOptionsMenu(menu);
     }*/
     
+    private void handleIntent(Intent intent) {
+
+        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+            String query = intent.getStringExtra(SearchManager.QUERY);
+            //use the query to search your data somehow
+            
+            myAddress.setText(query);
+        }
+    }
+    @Override
+    protected void onNewIntent(Intent intent) {
+        
+        handleIntent(intent);
+    }
+
+    SearchView searchView;
+    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
+	private void setupSearchView(MenuItem searchItem) {
+    	 
+        if (isAlwaysExpanded()) {
+            searchView.setIconifiedByDefault(false);
+        } else {
+            searchItem.setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_IF_ROOM
+                    | MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
+        }
+ 
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        if (searchManager != null) {
+            List<SearchableInfo> searchables = searchManager.getSearchablesInGlobalSearch();
+ 
+            SearchableInfo info = searchManager.getSearchableInfo(getComponentName());
+            for (SearchableInfo inf : searchables) {
+                if (inf.getSuggestAuthority() != null
+                        && inf.getSuggestAuthority().startsWith("applications")) {
+                    info = inf;
+                }
+            }
+            searchView.setSearchableInfo(info);
+        }
+ 
+        searchView.setOnQueryTextListener(this);
+    }
+ 
+    public boolean onQueryTextChange(String newText) {
+        myAddress.setText("Query = " + newText);
+        return false;
+    }
+ 
+    public boolean onQueryTextSubmit(String query) {
+    	myAddress.setText("Query = " + query + " : submitted");
+        return false;
+    }
+ 
+    public boolean onClose() {
+    	myAddress.setText("Closed!");
+        return false;
+    }
+ 
+    protected boolean isAlwaysExpanded() {
+        return false;
+    }
+
+    
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
 	@SuppressLint("NewApi")
 	@Override
@@ -78,12 +146,14 @@ public class YahooDealsMain extends Activity {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.yahoo_deals_main, menu);
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+        MenuItem searchItem = menu.findItem(R.id.action_search);
+        searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
 	    // Assumes current activity is the search-able activity
 	    searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
 	    searchView.setQueryHint("Search Deals");
+	    setupSearchView(searchItem);
 	    //searchView.setSubmitButtonEnabled(true);
-	    return super.onCreateOptionsMenu(menu);
+	    return true;
     }
     
     double LATITUDE = 41.869179;
@@ -110,17 +180,77 @@ public class YahooDealsMain extends Activity {
 
 		/* ********************************************************/
 
+		handleIntent(getIntent());
+		
 		
 		  /******** GETTING THE GEO LOCATION AND PERFORM ADDRESS SEARCH ****/
 		
-		
-		TextView myAddress = (TextView) findViewById(R.id.myAddress);
+		myAddress = (TextView) findViewById(R.id.myAddress);
 		LocationManager currentLocationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+		boolean enabled = currentLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+		// Check if enabled and if not send user to the GSP settings
+				// Better solution would be to display a dialog and suggesting to 
+				// go to the settings
+				if (!enabled) {
+				  Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+				  startActivity(intent);
+				} 
 		
+		Location location = currentLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);	
+		
+		if(location != null){
+			Geocoder geocoder = new Geocoder(getBaseContext(), Locale.ENGLISH);
+	        try {
+	            List<Address> addresses = geocoder.getFromLocation(location.getLatitude(),
+						location.getLongitude(), 1);
+
+	            if (addresses.size() > 0) {
+	                Address returnedAddress = addresses.get(0);
+	                StringBuilder strReturnedAddress = new StringBuilder(
+	                        "Address:\n");
+	                for (int i = 0; i < returnedAddress
+	                        .getMaxAddressLineIndex(); i++) {
+	                    strReturnedAddress.append(
+	                            returnedAddress.getAddressLine(i)).append("\n");
+	                }
+	                myAddress.setText(strReturnedAddress.toString());
+	            } else {
+	                myAddress.setText("No Address returned!");
+	            }
+	        } catch (IOException e) {
+	            // TODO Auto-generated catch block
+	            e.printStackTrace();
+
+	        }
+		}
+		String Address;
 		final LocationListener locationListener = new LocationListener() {
 	        public void onLocationChanged(Location location) {
-	        	LONGITUDE = location.getLongitude();
-	            LATITUDE  = location.getLatitude();
+	            LONGITUDE = location.getLongitude();
+	            LATITUDE = location.getLatitude();
+	            Geocoder geocoder = new Geocoder(getBaseContext(), Locale.ENGLISH);
+		        try {
+		            List<Address> addresses = geocoder.getFromLocation(location.getLatitude(),
+							location.getLongitude(), 1);
+
+		            if (addresses.size() > 0) {
+		                Address returnedAddress = addresses.get(0);
+		                StringBuilder strReturnedAddress = new StringBuilder(
+		                        "Address:\n");
+		                for (int i = 0; i < returnedAddress
+		                        .getMaxAddressLineIndex(); i++) {
+		                    strReturnedAddress.append(
+		                            returnedAddress.getAddressLine(i)).append("\n");
+		                }
+		                setAddress(strReturnedAddress.toString());
+		            } else {
+		            	setAddress("No Address returned!");
+		            }
+		        } catch (IOException e) {
+		            // TODO Auto-generated catch block
+		            e.printStackTrace();
+
+		        }
 	        }
 
 	        public void onProviderDisabled(String arg0) {
@@ -140,31 +270,9 @@ public class YahooDealsMain extends Activity {
 	    };
 
 	    currentLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000, 10, locationListener);
-	    myAddress = (TextView) findViewById(R.id.myAddress);
 	    
-	    Geocoder geocoder = new Geocoder(getBaseContext(), Locale.ENGLISH);
-        try {
-            List<Address> addresses = geocoder.getFromLocation(LATITUDE,
-					LONGITUDE, 1);
-
-            if (addresses.size() > 0) {
-                Address returnedAddress = addresses.get(0);
-                StringBuilder strReturnedAddress = new StringBuilder(
-                        "Address:\n");
-                for (int i = 0; i < returnedAddress
-                        .getMaxAddressLineIndex(); i++) {
-                    strReturnedAddress.append(
-                            returnedAddress.getAddressLine(i)).append("\n");
-                }
-                myAddress.setText(strReturnedAddress.toString());
-            } else {
-                myAddress.setText("No Address returned!");
-            }
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-
-        }
+	    
+	    
 		/*******************GEO LOCATION SEARCH ENDS**************/
 		
 		
@@ -263,4 +371,8 @@ public class YahooDealsMain extends Activity {
 
 		});		
 }
+	
+	public void setAddress(String address){
+		myAddress.setText(address);
+	}
 }
